@@ -57,7 +57,34 @@ function stepParticle(_particle, _particles) {
 	if (_particle.y < 0) {
 		_particle.y = 0;
 	}
-	var gravity = 20.0;
+	var gravity = 10.0;
+
+	for (var x=0; x<50; x++) {
+		for (var y= 0; y<50; y++) {
+			var x_diff = ((x * 20) - _particle.x);
+			var y_diff = ((y * 20) - _particle.y);
+			//console.log(x_diff);
+			//console.log(y_diff);
+			var dist = Math.sqrt((x_diff * x_diff) + (y_diff * y_diff));
+			if (dist > 300) {
+				dist *= 2.0;
+			} 
+
+			if (dist > 1) {
+				if (hashes[x][y] < 15) {
+					x_delta += (x_diff * (1 / (dist * dist))) * (hashes[x][y]);
+					y_delta += (y_diff * (1 / (dist * dist))) * (hashes[x][y]);
+				} else {
+					x_delta -= (x_diff * (1 / (dist * dist))) * (hashes[x][y]) * 2;
+					y_delta -= (y_diff * (1 / (dist * dist))) * (hashes[x][y]) * 2;
+				}
+				//console.log("Y delta: ");
+				//console.log(y_delta);
+			}
+
+		}
+	}
+	
 	for (var i=0; i<_particles.length; i++) {
 		var x_diff = (_particles[i].x - _particle.x);
 		var y_diff = (_particles[i].y - _particle.y);
@@ -77,8 +104,8 @@ function stepParticle(_particle, _particles) {
 		}
 
 		if (dist != 0) {
-			x_delta += x_diff * (1 / (dist * dist));
-			y_delta += y_diff * (1 / (dist * dist));
+			x_delta += (x_diff * (1 / (dist * dist))) / 2;
+			y_delta += (y_diff * (1 / (dist * dist))) / 2;
 			//console.log("Y delta: ");
 			//console.log(y_delta);
 		}
@@ -89,8 +116,8 @@ function stepParticle(_particle, _particles) {
 
 	_particle.x_vel += (x_delta / gravity) / 2;
 	_particle.y_vel += (y_delta / gravity) / 2;
-	_particle.x_vel *= 0.999;
-	_particle.y_vel *= 0.999;
+	_particle.x_vel *= 0.99;
+	_particle.y_vel *= 0.99;
 
 
 
@@ -109,10 +136,16 @@ function clear() {
 	ctx.fillStyle="#000000";
 	ctx.fillRect(0,0,1000,1000);
 	var letters = '0123456789ABCDEF'.split('');
-	for (var x=0; x<50;x++) {
-		for (var y=0; y<50; y++) {
-			letter = letters[hashes[x][y] / 2];
-			var col = "#" + letter + letter + "0000";
+	for (var x=0; x<20;x++) {
+		for (var y=0; y<20; y++) {
+			if (hashes[x][y] > 15) {
+				hashes[x][y] -= 15;
+				letter = letters[hashes[x][y] > 15 ? 15 : hashes[x][y]];
+				col = "#" + letter + letter + "0000";
+			} else {
+				letter = letters[hashes[x][y]];
+				col = "#00" + letter + letter + "00";
+			}
 			ctx.fillStyle=col;
 			//ctx.fillStyle="#FFFFFF";
 			ctx.fillRect(x * 20, y * 20, 20, 20);

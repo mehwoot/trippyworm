@@ -1,0 +1,157 @@
+<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;">
+</canvas>
+
+
+<script>
+
+c=document.getElementById("myCanvas");
+ctx=c.getContext("2d");
+
+function get_random_color() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
+}
+
+particles = new Array();
+for (var i =0.0; i<200; i++) {
+	particles[i] = {x: 50.0 + (i * 3), y:50.0 + i, x_vel : 0.0, y_vel : 0.0, colour: get_random_color()};
+	particles[i+200] = {x: 50.0 + (i * 1), y:450.0 + i, x_vel : 0.0, y_vel : 0.0, colour: get_random_color()};
+}
+
+hashes = new Array();
+for (var i=0; i<11; i++) {
+	hashes[i] = new Array();
+	for (var j=0; j<11; j++) {
+		hashes[i][j] = 0;
+	}
+}
+
+function stepParticle(_particle, _particles) {
+	var x_delta = 0;
+	var y_delta = 0;
+	for (var i=0; i<_particles.length; i++) {
+		var x_diff = (_particles[i].x - _particle.x);
+		var y_diff = (_particles[i].y - _particle.y);
+		//console.log(x_diff);
+		//console.log(y_diff);
+		var dist = Math.sqrt((x_diff * x_diff) + (y_diff * y_diff));
+		if (dist > 250) {
+			dist *= 3.0;
+		}
+		if (dist != 0) {
+			x_delta += x_diff * (1 / (dist * dist));
+			y_delta += y_diff * (1 / (dist * dist));
+			//console.log("Y delta: ");
+			//console.log(y_delta);
+		}
+		//console.log(dist);
+	}
+	if (_particle.x < 0 || _particle.x > 1000) {
+		_particle.x_vel = -_particle.x_vel;
+	}
+	if (_particle.y < 0 || _particle.y > 1000) {
+		_particle.y_vel = -_particle.y_vel;
+	}
+	if (_particle.x > 999) {
+		_particle.x = 999;
+	}
+	if (_particle.y > 999) {
+		_particle.y = 999;
+	}
+	if (_particle.x < 0) {
+		_particle.x = 0;
+	}
+	if (_particle.y < 0) {
+		_particle.y = 0;
+	}
+	var gravity = hashes[Math.round(_particle.x / 100)][Math.round(_particle.y / 100)];
+	if (gravity > 210) {
+		gravity = 0.75;
+	} else {
+		gravity = 20.0;
+	}
+	_particle.x_vel += x_delta / gravity;
+	_particle.y_vel += y_delta / gravity;
+	_particle.x_vel *= 0.99;
+	_particle.y_vel *= 0.99;
+
+
+
+	_particle.x += _particle.x_vel;
+	_particle.y += _particle.y_vel;
+
+
+}
+
+function drawPixel(x, y, colour) {
+	ctx.fillStyle=colour;
+	ctx.fillRect(x,y,2,2);
+}
+
+function clear() {
+	ctx.fillStyle="#000000";
+	ctx.fillRect(0,0,1000,1000);
+}
+
+function drawParticles(_particles) {
+	for (var i=0; i<_particles.length; i++) {
+		drawPixel(_particles[i].x, _particles[i].y, _particles[i].colour);
+	}
+}
+
+function stepParticles(_particles) {
+	var __particles = new Array();
+	var old_particles = new Array();
+	for (var i=0; i<_particles.length; i++) {
+		var __particle = {x:_particles[i].x, y:_particles[i].y, x_vel : _particles[i].x_vel, y_vel : _particles[i].y_vel, colour: _particles[i].colour};
+		stepParticle(__particle, _particles);
+		__particles[i] = __particle;
+	}
+	for (var i=0; i<_particles.length; i++) {
+		old_particles[i] = _particles[i];
+		_particles[i] = __particles[i];
+	}
+	return old_particles;
+}
+
+function hashParticles(_particles) {
+	for (var i=0; i<11; i++) {
+		for (var j=0; j<11; j++) {
+			hashes[i][j] = 0;
+		}
+	}
+	for (var i=0; i<_particles.length; i++) {
+		if (_particles[i].x > 0 && _particles[i].x < 1000 && _particles[i].y > 0 && _particles[i].y < 1000) {
+			hashes[Math.round(_particles[i].x / 100)][Math.round(_particles[i].y / 100)] += 1;
+		}
+	}
+}
+
+i = 0;
+parts = new Array();
+for (var j=0; j<5; j++) {
+	parts[j] = new Array();
+}
+
+function step() {
+	i++;
+	//if (i % 5 == 0) {
+		clear();
+	//}
+	hashParticles(particles);
+	parts[i % 5] = stepParticles(particles);
+	drawParticles(particles);
+	for (var j=0; j<5; j++) {
+		drawParticles(parts[j]);
+	}
+
+}
+
+setInterval(function() { step(); }, 50);
+
+
+</script>

@@ -29,9 +29,9 @@ for (var i =0.0; i<20; i++) {
 }
 
 hashes = new Array();
-for (var i=0; i<11; i++) {
+for (var i=0; i<110; i++) {
 	hashes[i] = new Array();
-	for (var j=0; j<11; j++) {
+	for (var j=0; j<110; j++) {
 		hashes[i][j] = 0;
 	}
 }
@@ -39,23 +39,6 @@ for (var i=0; i<11; i++) {
 function stepParticle(_particle, _particles) {
 	var x_delta = 0;
 	var y_delta = 0;
-	for (var i=0; i<_particles.length; i++) {
-		var x_diff = (_particles[i].x - _particle.x);
-		var y_diff = (_particles[i].y - _particle.y);
-		//console.log(x_diff);
-		//console.log(y_diff);
-		var dist = Math.sqrt((x_diff * x_diff) + (y_diff * y_diff));
-		if (dist > 300) {
-			dist *= 5.0;
-		}
-		if (dist != 0) {
-			x_delta += x_diff * (1 / (dist * dist));
-			y_delta += y_diff * (1 / (dist * dist));
-			//console.log("Y delta: ");
-			//console.log(y_delta);
-		}
-		//console.log(dist);
-	}
 	if (_particle.x < 0 || _particle.x > 1000) {
 		_particle.x_vel = -_particle.x_vel;
 	}
@@ -74,20 +57,40 @@ function stepParticle(_particle, _particles) {
 	if (_particle.y < 0) {
 		_particle.y = 0;
 	}
-	var gravity = hashes[Math.round(_particle.x / 100)][Math.round(_particle.y / 100)];
-	if (gravity > 70) {
-		if (gravity > 390) {
-			gravity = 1.0;
+	var gravity = 20.0;
+	for (var i=0; i<_particles.length; i++) {
+		var x_diff = (_particles[i].x - _particle.x);
+		var y_diff = (_particles[i].y - _particle.y);
+		//console.log(x_diff);
+		//console.log(y_diff);
+		var dist = Math.sqrt((x_diff * x_diff) + (y_diff * y_diff));
+		if (dist > 300) {
+			dist *= 2.0;
+		} 
+		if (gravity > 15) {
+
 		} else {
-			gravity = 100.0;
+			if (dist < 10) {
+				x_diff = -x_diff;
+				y_diff = -y_diff;
+			}
 		}
-	} else {
-		gravity = 20.0;
+
+		if (dist != 0) {
+			x_delta += x_diff * (1 / (dist * dist));
+			y_delta += y_diff * (1 / (dist * dist));
+			//console.log("Y delta: ");
+			//console.log(y_delta);
+		}
+
+		//console.log(dist);
 	}
+
+
 	_particle.x_vel += (x_delta / gravity) / 2;
 	_particle.y_vel += (y_delta / gravity) / 2;
-	_particle.x_vel *= 0.997;
-	_particle.y_vel *= 0.997;
+	_particle.x_vel *= 0.999;
+	_particle.y_vel *= 0.999;
 
 
 
@@ -105,6 +108,16 @@ function drawPixel(x, y, colour, size) {
 function clear() {
 	ctx.fillStyle="#000000";
 	ctx.fillRect(0,0,1000,1000);
+	var letters = '0123456789ABCDEF'.split('');
+	for (var x=0; x<50;x++) {
+		for (var y=0; y<50; y++) {
+			letter = letters[hashes[x][y] / 2];
+			var col = "#" + letter + letter + "0000";
+			ctx.fillStyle=col;
+			//ctx.fillStyle="#FFFFFF";
+			ctx.fillRect(x * 20, y * 20, 20, 20);
+		}
+	}
 }
 
 function drawParticles(_particles, size) {
@@ -129,15 +142,17 @@ function stepParticles(_particles) {
 	return old_particles;
 }
 
-function hashParticles(_particles) {
-	for (var i=0; i<11; i++) {
-		for (var j=0; j<11; j++) {
-			hashes[i][j] = 0;
+function hashParticles(_particles, seq) {
+	if (seq % 5 == 0){
+		for (var i=0; i<100; i++) {
+			for (var j=0; j<100; j++) {
+				hashes[i][j] = 0;
+			}
 		}
 	}
 	for (var i=0; i<_particles.length; i++) {
 		if (_particles[i].x > 0 && _particles[i].x < 1000 && _particles[i].y > 0 && _particles[i].y < 1000) {
-			hashes[Math.round(_particles[i].x / 100)][Math.round(_particles[i].y / 100)] += 1;
+			hashes[Math.round(_particles[i].x / 20)][Math.round(_particles[i].y / 20)] += 1;
 		}
 	}
 }
@@ -151,9 +166,9 @@ for (var j=0; j<5; j++) {
 function step() {
 	i++;
 	//if (i % 5 == 0) {
-		clear();
 	//}
-	hashParticles(particles);
+	hashParticles(particles, i);
+	clear();
 	parts[i % 5] = stepParticles(particles);
 	drawParticles(particles,5);
 	for (var j=0; j<5; j++) {

@@ -17,9 +17,15 @@ function get_random_color() {
 }
 
 particles = new Array();
-for (var i =0.0; i<200; i++) {
+/*for (var i =0.0; i<200; i++) {
 	particles[i] = {x: 50.0 + (i * 3), y:50.0 + i, x_vel : 0.0, y_vel : 0.0, colour: get_random_color()};
 	particles[i+200] = {x: 50.0 + (i * 1), y:450.0 + i, x_vel : 0.0, y_vel : 0.0, colour: get_random_color()};
+}*/
+
+for (var i =0.0; i<20; i++) {
+	for (var j=0; j<20; j++) {
+		particles[(i * 20) + j] = {x: i * 50, y: j  * 50, x_vel : 0.0, y_vel : 0.0, colour: get_random_color()};
+	}
 }
 
 hashes = new Array();

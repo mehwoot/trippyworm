@@ -70,12 +70,12 @@ function stepParticle(_particle, _particles) {
 	}
 	var gravity = hashes[Math.round(_particle.x / 100)][Math.round(_particle.y / 100)];
 	if (gravity > 210) {
-		gravity = 0.75;
+		gravity = 0.65;
 	} else {
 		gravity = 20.0;
 	}
-	_particle.x_vel += x_delta / gravity;
-	_particle.y_vel += y_delta / gravity;
+	_particle.x_vel += (x_delta / gravity) / 2;
+	_particle.y_vel += (y_delta / gravity) / 2;
 	_particle.x_vel *= 0.99;
 	_particle.y_vel *= 0.99;
 
@@ -87,9 +87,9 @@ function stepParticle(_particle, _particles) {
 
 }
 
-function drawPixel(x, y, colour) {
+function drawPixel(x, y, colour, size) {
 	ctx.fillStyle=colour;
-	ctx.fillRect(x,y,2,2);
+	ctx.fillRect(x,y,size,size);
 }
 
 function clear() {
@@ -97,9 +97,10 @@ function clear() {
 	ctx.fillRect(0,0,1000,1000);
 }
 
-function drawParticles(_particles) {
+function drawParticles(_particles, size) {
 	for (var i=0; i<_particles.length; i++) {
-		drawPixel(_particles[i].x, _particles[i].y, _particles[i].colour);
+		//drawPixel(_particles[i].x, _particles[i].y, _particles[i].colour, size * (1 + ((Math.abs(_particles[i].x_vel) + Math.abs(_particles[i].y_vel)) / 2)));
+		drawPixel(_particles[i].x, _particles[i].y, _particles[i].colour, size);
 	}
 }
 
@@ -144,14 +145,14 @@ function step() {
 	//}
 	hashParticles(particles);
 	parts[i % 5] = stepParticles(particles);
-	drawParticles(particles);
+	drawParticles(particles,5);
 	for (var j=0; j<5; j++) {
-		drawParticles(parts[j]);
+		drawParticles(parts[(i-j) % 5],4-(j/2));
 	}
 
 }
 
-setInterval(function() { step(); }, 50);
+setInterval(function() { step(); }, 25);
 
 
 </script>
